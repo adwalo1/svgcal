@@ -2,7 +2,7 @@
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
   <MonoDevelop.Ide.Workbench ActiveDocument="svgcal/Program.cs">
     <Files>
-      <File FileName="svgcal/Program.cs" Line="107" Column="39" />
+      <File FileName="svgcal/Program.cs" Line="172" Column="4" />
       <File FileName="svgcal/SimpleIcal.cs" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>

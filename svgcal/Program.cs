@@ -81,6 +81,10 @@ namespace svgcal
 			"Samstag", "Sonntag"
 		};
 
+		static string[] DayNamesShort = {"SO", "MO", "DI", "MI", "DO", "FR","SA"};
+
+
+
 		static SimpleIcal ical;
 
 
@@ -101,29 +105,17 @@ namespace svgcal
 			return te.Height+te.YBearing;
 		}
 
-		public static void handleMonth(int year, int month)
+		public static void PrintMonthHeader (Cairo.Context cr, int year, int month, bool outputMonthHeaderRect=false)
 		{
+			if (outputMonthHeaderRect) {
+				var MonthHeaderRect = new Rectangle (
+					                     MarginLeft, MarginUp,
+					                     ContentWidth, 
+					                     MonthHeader);
+				cr.Rectangle (MonthHeaderRect);
+			}
 
-			var surface = new SvgSurface (month.ToString("00")+".svg", width, height);
-			Cairo.Context cr = new Context(surface);
-
-			cr.SetSourceRGBA(0.0, 0.0, 0.0, 1.0);
-
-			var d = new DateTime (year, month,1);
-
-
-			var DayRectArea = new Rectangle (
-			                  MarginLeft, MarginUp + TotalHeader,
-			                  ContentWidth, ContentHeight);
-			//cr.Rectangle (DayRectArea);
-
-			var MonthHeaderRect = new Rectangle (
-				MarginLeft, MarginUp,
-				ContentWidth, 
-				MonthHeader);
-			//cr.Rectangle (MonthHeaderRect);
-
-			var Month= MonthNames[d.Month];
+			var Month= MonthNames[month];
 			cr.SetFontSize (MonthHeader*0.8);
 			var te= cr.TextExtents (Month);
 			cr.MoveTo (MarginLeft- te.XBearing,
@@ -134,6 +126,133 @@ namespace svgcal
 			cr.MoveTo (width-MarginRight-te.Width-te.XBearing, 
 				MarginUp+MonthHeader-((MonthHeader-te.Height)/2)-(te.Height+te.YBearing));
 			cr.ShowText (year.ToString());					
+			
+			
+		}
+
+		public static void outputDayBox(Cairo.Context cr, DateTime d, Rectangle r)
+		{
+			cr.SetSourceRGBA(0,0,0, 1.0);
+			//cr.MoveTo (r.X, r.Y);
+			cr.MoveTo (r.X, r.Y + r.Height);
+			cr.LineTo (r.X+(r.Width), r.Y+r.Height);
+
+			//cr.Rectangle (r);
+			cr.Stroke();
+
+			//calculate the width of the Day-Text
+			cr.SetFontSize (r.Height*0.9);
+			string daynumber = string.Format ("{0}", d.Day);
+			var te= cr.TextExtents (daynumber);
+			var Textwidth = te.Width;
+			cr.SetFontSize (r.Height * 0.5);
+			Textwidth += cr.TextExtents (DayNamesShort [(int)d.DayOfWeek]).Width;
+
+			//Reset the Font-size
+			cr.SetFontSize (r.Height*0.9);
+
+			if (d.DayOfWeek == DayOfWeek.Sunday || d.DayOfWeek == DayOfWeek.Saturday) {
+
+				//For weekends, make the text white on a black surface
+				//start with the black box
+				cr.SetSourceRGBA (0, 0, 0, 1.0);
+				var blackbackground = new Rectangle (r.X, r.Y, Textwidth+3*milimeter, r.Height);
+
+				cr.Rectangle (blackbackground);
+				cr.Fill ();
+				cr.Stroke ();
+
+				//Now the white text
+				cr.SetSourceRGBA (1, 1, 1, 1.0);
+				cr.MoveTo (r.X+milimeter, r.Y+r.Height-milimeter);
+				cr.ShowText (daynumber);
+				cr.SetFontSize (r.Height * 0.5);
+				cr.ShowText (DayNamesShort [(int)d.DayOfWeek]);
+				cr.Stroke ();
+
+			} else {
+				cr.SetSourceRGBA (0, 0, 0, 1.0);
+				cr.MoveTo (r.X+milimeter, r.Y+r.Height-milimeter);
+				cr.ShowText (daynumber);
+				cr.SetFontSize (r.Height*0.5);
+				cr.ShowText (DayNamesShort[(int)d.DayOfWeek]);
+				cr.Stroke();
+			}
+
+			string datestring = d.Year.ToString ("0000") + d.Month.ToString ("00") + d.Day.ToString("00");
+			if (ical.holidays.ContainsKey (datestring)) {
+
+				cr.SetSourceRGBA (0, 0, 0, 1.0);
+				cr.SetFontSize (r.Height*0.3);
+				cr.MoveTo (r.X+4*milimeter+Textwidth, r.Y+r.Height-milimeter);
+				string padding = " ";
+				foreach (var s in ical.holidays[datestring]) {
+					cr.ShowText (padding+s);
+					padding = ", ";
+				}
+				cr.Stroke ();
+			}
+		}
+
+		public static void handleMonth2Column(int year, int month)
+		{
+
+			var surface = new SvgSurface (month.ToString("00")+".svg", width, height);
+			Cairo.Context cr = new Context(surface);
+
+			cr.SetSourceRGBA(0.0, 0.0, 0.0, 1.0);
+
+			PrintMonthHeader (cr, year, month);
+			var d = new DateTime (year, month,1);
+
+			var lastDayOfMonth = DateTime.DaysInMonth(d.Year, d.Month);
+
+
+			//start with the first column
+			int currentDay;
+			var BoxHeight = (ContentHeight+WeekdayHeader) / 15;
+			var BoxWidth = ContentWidth - width / 2;
+
+			for (; d.Day <= 15; d=d.AddDays(1)) {
+				var DayBox = new Rectangle (
+					MarginLeft, MarginUp + MonthHeader+(d.Day-1)*BoxHeight,
+					BoxWidth, BoxHeight);
+				
+				outputDayBox (cr, d, DayBox);
+			}
+
+			for (; d.Month== month; d=d.AddDays(1)) {
+				var DayBox = new Rectangle (
+					MarginLeft+width/2, MarginUp + MonthHeader+(d.Day-16)*BoxHeight,
+					BoxWidth, BoxHeight);
+
+				outputDayBox (cr, d, DayBox);
+			}
+
+			cr.Stroke();
+			surface.Finish ();
+			
+			
+		}
+		public static void handleMonth(int year, int month)
+		{
+
+			var surface = new SvgSurface (month.ToString("00")+".svg", width, height);
+			Cairo.Context cr = new Context(surface);
+
+			cr.SetSourceRGBA(0.0, 0.0, 0.0, 1.0);
+
+			PrintMonthHeader (cr, year, month);
+
+			var d = new DateTime (year, month,1);
+
+
+			var DayRectArea = new Rectangle (
+			                  MarginLeft, MarginUp + TotalHeader,
+			                  ContentWidth, ContentHeight);
+			//cr.Rectangle (DayRectArea);
+
+
 
 			var WeekdayRect = new Rectangle (
 				MarginLeft, MarginUp+MonthHeader,
@@ -153,7 +272,7 @@ namespace svgcal
 
 			//Calculate the Fontsize so that it will fit nicely into the columnwidth
 			cr.SetFontSize(WeekdayHeader);
-			te = cr.TextExtents ("Donnerstag");
+			var te = cr.TextExtents ("Donnerstag");
 			cr.SetFontSize (WeekdayHeader*(Columnwidth*0.9)/te.Width);
 
 			for(column=0;column<7;column++)
@@ -253,7 +372,7 @@ namespace svgcal
 
 			int i;
 			for(i=1; i<=12;i++)
-				handleMonth (2017, i);
+				handleMonth2Column (2018, i);
 
 			Console.WriteLine ("Hello World!");
 		}
