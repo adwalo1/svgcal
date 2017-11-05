@@ -1,0 +1,13 @@
+﻿<Properties StartupItem="svgcal/svgcal.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="svgcal/Program.cs">
+    <Files>
+      <File FileName="svgcal/Program.cs" Line="107" Column="39" />
+      <File FileName="svgcal/SimpleIcal.cs" Line="1" Column="1" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
