@@ -11,6 +11,7 @@ svgvcal is a cli-tool to generate calendar-pages. At the moment it's not really 
 * Prepare 12 photos for the 12 months. The target size is 203 x 305 mm, your photos should have this aspect-ratio.
 * Have the 12 photos developed on real photo paper in the size 20x30cm (the actual size is 203x305mm or 8x12 inch). I like to use [fotoservice.mediamarkt.de](fotoservice.mediamarkt.de), they only charge 0.45€ per piece and the shipping is just 2€ (i am not affiliated with them in any way, just a satisfied customer).
 * Use svgcal to generate a calendar-page for each month
+  * svgcal also has an option to import a ics-file.This is useful for marking public holidays on the calendar, but i guess this feature could also be used for marking birthdays or anniversaries of your family. If you have a google-account, you can use google's ready-made calendars with public-holidays (available for different countries). Google has a option to download these calendars as ics-file.
 * Print the calendar-pages for january to november on the _backside_ of 11 of the photos.
   * Use a laser-printer (inkjets will not work)
   * My old HP-printer was able to feed the photos just fine. My new samsung printer not...the photo-surface is too slippery so the printer cannot feed the photo well. Place a piece of paper under the photo, and then fold 3 cm of the paper around the edge of the photo (the side where the printer will start feeding the paper). This will protect the photo surface and at least my printer can feed the photos this way just fine. 
